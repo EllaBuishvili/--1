@@ -1,0 +1,122 @@
+import re
+
+ALLOWED_OPERATORS = {"+", "-", "/", "*"}
+
+
+def roman_number_to_int(s):
+    rom_val = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, }
+    int_val = 0
+    s = s.upper()
+    for i in range(len(s)):
+        if i > 0 and rom_val[s[i]] > rom_val[s[i - 1]]:
+            int_val += rom_val[s[i]] - 2 * rom_val[s[i - 1]]
+        else:
+            int_val += rom_val[s[i]]
+    return int_val
+
+
+def int_to_roman_number(num):
+    val = [    100, 90, 50, 40, 10, 9, 5, 4, 1]
+    syb = [    "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"]
+
+    roman_num = ''
+    i = 0
+    while num > 0:
+        for _ in range(num // val[i]):
+            roman_num += syb[i]
+            num -= val[i]
+        i += 1
+    return roman_num.upper()
+
+
+def is_correct_int_number(integer):
+    if 0 < integer < 100:
+        return True
+    return False
+
+
+def is_roman_number(string_number):
+    """Checks if string_number is correct Roman symbol"""
+    pattern = re.compile(r"""   
+                                ^M{0,3}
+                                (CM|CD|D?C{0,3})?
+                                (XC|XL|L?X{0,3})?
+                                (IX|IV|V?I{0,3})?$
+            """, re.VERBOSE)
+
+    if re.match(pattern, string_number):
+        return True
+
+    return False
+
+
+def calculator(number1, number2, operation):
+    if operation == '+':
+        return number1 + number2
+    elif operation == '-':
+        return number1 - number2
+    elif operation == '/':
+        return number1 // number2
+    elif operation == '*':
+        return number1 * number2
+    else:
+        raise ValueError("invalid operator")
+
+
+def calculate_result(numbers, operations):
+    total = numbers[0]
+    for i in range(1, len(numbers)):
+        total = calculator(total, numbers[i], operations[i - 1])
+
+    return total
+
+
+def main():
+    numbers = list()
+    operators = list()
+
+    is_input_number = True
+    while True:
+        if is_input_number:
+            input_string = input("Please insert the number: ")
+            if input_string == "exit":
+                is_input_number = True
+            else:
+                if is_roman_number(input_string):
+                    numbers.append(input_string)
+                    is_input_number = False
+                else:
+                    print("The number you have writen is incorrect.")
+                    is_input_number = True
+                    continue
+        else:
+            input_string = input("Please insert the operator: ")
+            if input_string == "exit":
+                is_input_number = False
+            else:
+                if input_string in ALLOWED_OPERATORS:
+                    operators.append(input_string)
+                    is_input_number = True
+                else:
+                    print("operation not allowed")
+                    continue
+        # check if exit is needed and the last action was number input not operator
+        if input_string == "exit":
+            if is_input_number:
+                print("Please insert the number first as the total operation is not correct")
+                continue
+            else:
+                break
+
+    # transfer to int
+    numbers = [roman_number_to_int(number) for number in numbers]
+    total = calculate_result(numbers, operators)
+    if not is_correct_int_number(total):
+        print(f"Romans didn't know that number {total} exists")
+        return
+    # roman
+    total = int_to_roman_number(total)
+    print(f"The answer is {total}")
+
+
+main()
